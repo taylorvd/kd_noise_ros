@@ -89,17 +89,17 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& input)
     std::mt19937 gen(rd());
  // A gamma distribution with alpha=1, and beta=2
     // approximates an exponential distribution.
-    std::gamma_distribution<> d(2,0.5);
-
+    std::gamma_distribution<> d(1,2);
+  std::normal_distribution<> f{0, 0.5};
 
   for (size_t i = 0; i < cloud->points.size(); ++i) {
     pcl::PointXYZ point = cloud->points[i];
  
     //printf("before noise %f \n",point.x);
-    point.x += d(gen)*0.1;
+    point.x += d(gen)*0.1 + f(gen);
     //printf("after noise %f \n ", point.x);
-    point.y += d(gen)*0.1;
-    point.z += d(gen)*0.1;
+    point.y += d(gen)*0.1 + f(gen);
+    point.z += d(gen)*0.1 + f(gen);
     cloud_noise->points.push_back(point);
   }
   cloud_noise->width = cloud_noise->points.size();
@@ -115,9 +115,9 @@ void cloud_cb(const sensor_msgs::PointCloud2ConstPtr& input)
   for (int i = 0; i < (*cloud_noise).size(); i++)
   {
     pcl::PointXYZ pt(cloud_noise->points[i].x, cloud_noise->points[i].y, cloud_noise->points[i].z);
-    float zAvg = (rand() % 100)*0.01;
+    float zAvg = (rand() % 1000)*0.001;
 
-    if (zAvg < 0.98) // e.g. remove all pts below zAvg
+    if (zAvg < 0.995) // e.g. remove all pts below zAvg
     {
       inliers->indices.push_back(i);
     }
